@@ -13,7 +13,8 @@ const Home = () => {
 
     const fetchNews = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/news?search=${searchTerm}&category=${category}`);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${API_URL}/api/news?search=${searchTerm}&category=${category}`);
             setNews(res.data);
             setLoading(false);
         } catch (err) {
@@ -77,8 +78,8 @@ const Home = () => {
                         key={cat}
                         onClick={() => setCategory(cat === 'All' ? '' : cat)}
                         className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${(category === cat || (cat === 'All' && !category))
-                                ? 'bg-white text-gray-900 shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105'
-                                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700 hover:text-white border border-transparent hover:border-gray-600'
+                            ? 'bg-white text-gray-900 shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105'
+                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700 hover:text-white border border-transparent hover:border-gray-600'
                             }`}
                     >
                         {cat}

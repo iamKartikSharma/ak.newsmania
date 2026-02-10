@@ -23,7 +23,8 @@ const UploadModal = ({ onSuccess }) => {
         if (file) formData.append('file', file);
 
         try {
-            await axios.post('http://localhost:5000/api/news', formData, {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${API_URL}/api/news`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             toast.success('News uploaded successfully!');

@@ -14,7 +14,8 @@ const EventView = () => {
     useEffect(() => {
         const fetchEventDetails = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/events/${id}`);
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const res = await axios.get(`${API_URL}/api/events/${id}`);
                 setEvent(res.data.event);
                 setNews(res.data.news);
                 setLoading(false);
