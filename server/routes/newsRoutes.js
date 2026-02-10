@@ -49,15 +49,24 @@ router.get('/', async (req, res) => {
 
 // @desc    Upload news
 // @route   POST /api/news
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', upload.fields([{ name: 'file', maxCount: 1 }, { name: 'voice', maxCount: 1 }]), async (req, res) => {
     try {
         const { title, content, category, type, date, eventId } = req.body;
         let mediaUrl = '';
         let publicId = '';
+        let voiceUrl = '';
+        let voicePublicId = '';
 
-        if (req.file) {
-            mediaUrl = req.file.path;
-            publicId = req.file.filename;
+        // Handle Main File
+        if (req.files && req.files['file']) {
+            mediaUrl = req.files['file'][0].path;
+            publicId = req.files['file'][0].filename;
+        }
+
+        // Handle Voice Note
+        if (req.files && req.files['voice']) {
+            voiceUrl = req.files['voice'][0].path;
+            voicePublicId = req.files['voice'][0].filename;
         }
 
         const newNews = new News({
@@ -67,6 +76,8 @@ router.post('/', upload.single('file'), async (req, res) => {
             type,
             mediaUrl,
             publicId,
+            voiceUrl,
+            voicePublicId,
             date: date || Date.now(),
             eventId: eventId || null
         });
@@ -87,6 +98,10 @@ router.delete('/:id', async (req, res) => {
 
         if (news.publicId) {
             await cloudinary.uploader.destroy(news.publicId);
+        }
+
+        if (news.voicePublicId) {
+            await cloudinary.uploader.destroy(news.voicePublicId, { resource_type: 'video' }); // Audio is often stored as video in Cloudinary or 'raw'
         }
 
         await News.deleteOne({ _id: req.params.id });

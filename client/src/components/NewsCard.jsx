@@ -64,6 +64,15 @@ const NewsCard = ({ news, index }) => {
                     </div>
                     {/* Add edit/delete actions here if needed */}
                 </div>
+                {news.voiceUrl && (
+                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2 text-blue-400">
+                            <FiMic className="w-4 h-4" />
+                            <span className="text-xs font-medium uppercase tracking-wider">Voice Note</span>
+                        </div>
+                        <audio src={news.voiceUrl} controls className="w-full h-8" />
+                    </div>
+                )}
             </div>
         </motion.div>
     );
