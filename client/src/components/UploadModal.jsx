@@ -100,8 +100,9 @@ const UploadModal = ({ onSuccess }) => {
             onSuccess();
             handleClose();
         } catch (err) {
-            console.error(err);
-            toast.error('Failed to upload news');
+            console.error("Upload Error Details:", err);
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to upload news';
+            toast.error(`Upload failed: ${errorMessage}`);
         } finally {
             setLoading(false);
         }

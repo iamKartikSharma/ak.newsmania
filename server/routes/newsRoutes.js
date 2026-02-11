@@ -16,9 +16,17 @@ cloudinary.config({
 // Multer Storage
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'newsmania',
-        resource_type: 'auto', // Allow image, video, audio
+    params: async (req, file) => {
+        let resource_type = 'image';
+        if (file.mimetype.startsWith('audio') || file.mimetype.startsWith('video')) {
+            resource_type = 'video';
+        }
+
+        return {
+            folder: 'newsmania',
+            resource_type: resource_type,
+            public_id: file.fieldname + '-' + Date.now(),
+        };
     },
 });
 
