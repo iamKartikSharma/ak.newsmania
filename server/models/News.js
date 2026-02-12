@@ -9,6 +9,7 @@ const newsSchema = mongoose.Schema({
     publicId: { type: String }, // Cloudinary Public ID for deletion
     voiceUrl: { type: String }, // Voice Note URL
     voicePublicId: { type: String }, // Voice Note Public ID
+    link: { type: String }, // External Link
     date: { type: Date, default: Date.now },
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
 }, { timestamps: true });

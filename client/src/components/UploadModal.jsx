@@ -8,6 +8,7 @@ const UploadModal = ({ onSuccess }) => {
     const [content, setContent] = useState('');
     const [category, setCategory] = useState('');
     const [type, setType] = useState('text');
+    const [link, setLink] = useState('');
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -82,6 +83,7 @@ const UploadModal = ({ onSuccess }) => {
         formData.append('content', content);
         formData.append('category', category);
         formData.append('type', type);
+        formData.append('link', link);
 
         if (file) formData.append('file', file);
 
@@ -93,6 +95,7 @@ const UploadModal = ({ onSuccess }) => {
 
         try {
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            console.log(`[DEBUG] Sending request to: ${API_URL}/api/news`);
             await axios.post(`${API_URL}/api/news`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
@@ -116,6 +119,7 @@ const UploadModal = ({ onSuccess }) => {
         setFile(null);
         setType('text');
         setCategory('');
+        setLink('');
         discardRecording();
         if (isRecording) stopRecording();
     };
@@ -145,7 +149,7 @@ const UploadModal = ({ onSuccess }) => {
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm text-gray-300 mb-1">Category</label>
                                 <select
@@ -241,6 +245,17 @@ const UploadModal = ({ onSuccess }) => {
                                 value={content}
                                 onChange={e => setContent(e.target.value)}
                             ></textarea>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm text-gray-300 mb-1">External Link (Optional)</label>
+                            <input
+                                type="url"
+                                className="w-full bg-gray-800/50 border border-gray-700 text-white placeholder-gray-500 rounded-lg p-2 focus:border-blue-500 outline-none transition-colors"
+                                placeholder="https://example.com"
+                                value={link}
+                                onChange={e => setLink(e.target.value)}
+                            />
                         </div>
 
                         <div className="flex gap-3">

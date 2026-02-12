@@ -17,10 +17,12 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
+        console.log(`[DEBUG] Cloudinary processing file: ${file.originalname}, Mimetype: ${file.mimetype}`);
         let resource_type = 'image';
-        if (file.mimetype.startsWith('audio') || file.mimetype.startsWith('video')) {
+        if (file.mimetype && (file.mimetype.startsWith('audio') || file.mimetype.startsWith('video'))) {
             resource_type = 'video';
         }
+        console.log(`[DEBUG] Determined resource_type: ${resource_type}`);
 
         return {
             folder: 'newsmania',
@@ -58,8 +60,11 @@ router.get('/', async (req, res) => {
 // @desc    Upload news
 // @route   POST /api/news
 router.post('/', upload.fields([{ name: 'file', maxCount: 1 }, { name: 'voice', maxCount: 1 }]), async (req, res) => {
+    console.log('[DEBUG] POST /api/news request received');
+    console.log('[DEBUG] Body:', req.body);
+    console.log('[DEBUG] Files:', req.files);
     try {
-        const { title, content, category, type, date, eventId } = req.body;
+        const { title, content, category, type, date, eventId, link } = req.body;
         let mediaUrl = '';
         let publicId = '';
         let voiceUrl = '';
@@ -86,13 +91,16 @@ router.post('/', upload.fields([{ name: 'file', maxCount: 1 }, { name: 'voice', 
             publicId,
             voiceUrl,
             voicePublicId,
+            link,
             date: date || Date.now(),
             eventId: eventId || null
         });
 
         const savedNews = await newNews.save();
+        console.log('[DEBUG] News saved successfully, ID:', savedNews._id);
         res.status(201).json(savedNews);
     } catch (err) {
+        console.error('[DEBUG] Error in POST /api/news:', err);
         res.status(500).json({ message: err.message });
     }
 });

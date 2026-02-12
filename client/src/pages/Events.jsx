@@ -55,15 +55,15 @@ const Events = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-8 flex justify-between items-center"
+                className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
             >
                 <div>
-                    <h1 className="text-4xl font-bold mb-2">Tracked Events</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2">Tracked Events</h1>
                     <p className="text-gray-400">Follow the timeline of major happenings.</p>
                 </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl flex items-center gap-2 shadow-lg transition-all"
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl flex items-center gap-2 shadow-lg transition-all w-full md:w-auto justify-center"
                 >
                     <FiPlus /> New Event
                 </button>

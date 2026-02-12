@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { FiMic, FiImage, FiType, FiVideo, FiTrash2, FiCalendar } from 'react-icons/fi';
+import { FiMic, FiImage, FiType, FiVideo, FiTrash2, FiCalendar, FiLink } from 'react-icons/fi';
 
 const NewsCard = ({ news, index }) => {
     const getIcon = () => {
@@ -20,12 +20,12 @@ const NewsCard = ({ news, index }) => {
             className="glass-card rounded-2xl overflow-hidden break-inside-avoid"
         >
             {news.mediaUrl && news.type === 'image' && (
-                <div className="h-48 overflow-hidden">
+                <div className="h-40 md:h-48 overflow-hidden">
                     <img src={news.mediaUrl} alt={news.title} className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" />
                 </div>
             )}
             {news.mediaUrl && news.type === 'video' && (
-                <div className="h-48 bg-black">
+                <div className="h-40 md:h-48 bg-black">
                     <video src={news.mediaUrl} controls className="w-full h-full" />
                 </div>
             )}
@@ -55,6 +55,27 @@ const NewsCard = ({ news, index }) => {
                     <p className="text-gray-400 text-sm line-clamp-2 mb-4">
                         {news.content}
                     </p>
+                )}
+
+                {news.content && news.type !== 'text' && (
+                    <p className="text-gray-400 text-sm line-clamp-2 mb-4">
+                        {news.content}
+                    </p>
+                )}
+
+                {news.link && (
+                    <a
+                        href={news.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors mb-4 group"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <FiLink className="group-hover:rotate-45 transition-transform" />
+                        <span className="text-sm font-medium truncate max-w-[200px] underline decoration-blue-400/30 hover:decoration-blue-400">
+                            {news.link.replace(/^https?:\/\/(www\.)?/, '')}
+                        </span>
+                    </a>
                 )}
 
                 <div className="flex justify-between items-center text-xs text-gray-500 pt-4 border-t border-gray-700/30">

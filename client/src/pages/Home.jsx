@@ -38,11 +38,11 @@ const Home = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center mb-16 space-y-6"
             >
-                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+                <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight">
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
                         NewsMania
                     </span>
-                    <span className="block text-3xl md:text-4xl text-gray-300 mt-4 font-normal">
+                    <span className="block text-2xl md:text-4xl text-gray-300 mt-4 font-normal">
                         Curate. Track. Analyze.
                     </span>
                 </h1>
