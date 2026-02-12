@@ -125,7 +125,7 @@ router.put('/:id', upload.fields([{ name: 'file', maxCount: 10 }, { name: 'voice
             return res.status(404).json({ message: 'News not found' });
         }
 
-        const { title, content, category, type, link } = req.body;
+        const { title, content, category, type, link, deleteImages } = req.body;
 
         // Update text fields
         if (title) news.title = title;
@@ -134,32 +134,86 @@ router.put('/:id', upload.fields([{ name: 'file', maxCount: 10 }, { name: 'voice
         if (type) news.type = type;
         if (link) news.link = link;
 
+        // Handle Image Deletion
+        if (deleteImages) {
+            const publicIdsToDelete = Array.isArray(deleteImages) ? deleteImages : [deleteImages];
+            console.log(`[DEBUG] Deleting images: ${publicIdsToDelete.join(', ')}`);
+
+            for (const publicId of publicIdsToDelete) {
+                if (publicId) {
+                    try {
+                        await cloudinary.uploader.destroy(publicId);
+                    } catch (err) {
+                        console.error(`[DEBUG] Failed to delete image ${publicId} from Cloudinary:`, err);
+                    }
+                }
+            }
+
+            // Remove from news.images
+            if (news.images && news.images.length > 0) {
+                news.images = news.images.filter(img => !publicIdsToDelete.includes(img.publicId));
+            }
+        }
+
         // Handle Main File(s) - Append or Replace
         if (req.files && req.files['file']) {
+            console.log(`[DEBUG] Received ${req.files['file'].length} new files for update.`);
             const newFiles = req.files['file'].map(file => ({
                 url: file.path,
                 publicId: file.filename
             }));
 
-            if (type === 'image' || news.type === 'image') {
-                // If it's an image type, we append to existing images
+            // Determine current type (from body or existing record)
+            const currentType = type || news.type;
+
+            if (currentType === 'image') {
+                // Initialize images array if it doesn't exist
+                if (!news.images) {
+                    news.images = [];
+                }
+
+                // MIGRATION FIX: If images array is empty but we have a main mediaUrl, push it to array first
+                // Only do this if we are NOT deleting that specific image (checked via publicId if possible, but safely we can just add if it's not in delete list)
+                // However, if we just deleted everything, we shouldn't migrate. 
+                // Migration should happen if we are ADDING files to a legacy post.
+                // If the user deleted the "legacy" image via deleteImages (which requires us to know its publicId), it would be handled.
+                // But legacy images might not have a publicId stored in the array logic. 
+                // Let's rely on: if news.images is empty, and we have mediaUrl, AND we are adding files, we should preserve mediaUrl.
+                if (news.images.length === 0 && news.mediaUrl && (!deleteImages || !deleteImages.includes(news.publicId))) {
+                    news.images.push({
+                        url: news.mediaUrl,
+                        publicId: news.publicId || ''
+                    });
+                    console.log(`[DEBUG] Migrated legacy mediaUrl to images array.`);
+                }
+
+                // Append new files
                 news.images.push(...newFiles);
-                // If for some reason mediaUrl was empty, set it
-                if (!news.mediaUrl) {
+                console.log(`[DEBUG] Appended ${newFiles.length} images. Total images: ${news.images.length}`);
+            } else {
+                console.log(`[DEBUG] Replacing media for type: ${currentType}`);
+                // Replace main media for non-image types (video/audio)
+                if (newFiles.length > 0) {
                     news.mediaUrl = newFiles[0].url;
                     news.publicId = newFiles[0].publicId;
+                    news.images = []; // Clear images array
                 }
-            } else {
-                // For video/audio, we typically replace the main media
-                // Optional: Delete old media from Cloudinary if needed, but let's keep it safe for now or logic gets complex
-                news.mediaUrl = newFiles[0].url;
-                news.publicId = newFiles[0].publicId;
-                news.images = []; // Clear images if switching to non-image type? Or keep them? Let's clear to avoid confusion.
             }
+        }
+
+        // Update Main MediaUrl for Images (Sync with first image in array)
+        if ((type === 'image' || news.type === 'image') && news.images && news.images.length > 0) {
+            news.mediaUrl = news.images[0].url;
+            news.publicId = news.images[0].publicId;
+        } else if ((type === 'image' || news.type === 'image') && (!news.images || news.images.length === 0)) {
+            // If all images deleted
+            news.mediaUrl = '';
+            news.publicId = '';
         }
 
         // Handle Voice Note - Replace
         if (req.files && req.files['voice']) {
+            console.log(`[DEBUG] Received voice note update.`);
             news.voiceUrl = req.files['voice'][0].path;
             news.voicePublicId = req.files['voice'][0].filename;
         }

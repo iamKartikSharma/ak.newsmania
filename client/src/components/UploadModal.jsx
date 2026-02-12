@@ -10,6 +10,7 @@ const UploadModal = ({ onSuccess, initialData = null, onClose }) => {
     const [type, setType] = useState('text');
     const [link, setLink] = useState('');
     const [files, setFiles] = useState([]);
+    const [imagesToDelete, setImagesToDelete] = useState([]);
     const [loading, setLoading] = useState(false);
 
     // Pre-fill data if editing
@@ -20,6 +21,7 @@ const UploadModal = ({ onSuccess, initialData = null, onClose }) => {
             setCategory(initialData.category || '');
             setType(initialData.type || 'text');
             setLink(initialData.link || '');
+            setImagesToDelete([]); // Reset deletion list
             // We don't pre-fill files as we can't reconstruct File objects easily from URLs for the input
             // But the user can add *more* files.
         }
@@ -28,6 +30,7 @@ const UploadModal = ({ onSuccess, initialData = null, onClose }) => {
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
             const newFiles = Array.from(e.target.files);
+            console.log(`[DEBUG] Selected ${newFiles.length} files`);
             if (type === 'image') {
                 setFiles(prev => [...prev, ...newFiles]);
             } else {
@@ -38,6 +41,17 @@ const UploadModal = ({ onSuccess, initialData = null, onClose }) => {
 
     const removeFile = (index) => {
         setFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const toggleDeleteImage = (publicId) => {
+        if (!publicId) return;
+        setImagesToDelete(prev => {
+            if (prev.includes(publicId)) {
+                return prev.filter(id => id !== publicId);
+            } else {
+                return [...prev, publicId];
+            }
+        });
     };
 
     // Recording State
@@ -112,6 +126,11 @@ const UploadModal = ({ onSuccess, initialData = null, onClose }) => {
         formData.append('category', category);
         formData.append('type', type);
         formData.append('link', link);
+
+        // Append images to delete
+        imagesToDelete.forEach(id => {
+            formData.append('deleteImages', id);
+        });
 
         if (files.length > 0) {
             Array.from(files).forEach((file) => {
@@ -243,13 +262,28 @@ const UploadModal = ({ onSuccess, initialData = null, onClose }) => {
                                 {/* Existing Images (Edit Mode) */}
                                 {initialData && initialData.images && initialData.images.length > 0 && type === 'image' && (
                                     <div className="space-y-2">
-                                        <p className="text-sm text-gray-400">Existing Images:</p>
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-sm text-gray-400">Existing Images:</p>
+                                            <span className="text-xs text-gray-500">(Click to delete)</span>
+                                        </div>
                                         <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                                            {initialData.images.map((img, idx) => (
-                                                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-700">
-                                                    <img src={img.url} alt="existing" className="w-full h-full object-cover" />
-                                                </div>
-                                            ))}
+                                            {initialData.images.map((img, idx) => {
+                                                const isDeleted = imagesToDelete.includes(img.publicId);
+                                                return (
+                                                    <div
+                                                        key={idx}
+                                                        onClick={() => toggleDeleteImage(img.publicId)}
+                                                        className={`relative aspect-square rounded-lg overflow-hidden border cursor-pointer transition-all ${isDeleted ? 'border-red-500 opacity-50' : 'border-gray-700 hover:border-red-400'}`}
+                                                    >
+                                                        <img src={img.url} alt="existing" className="w-full h-full object-cover" />
+                                                        {isDeleted && (
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-red-500">
+                                                                <FiTrash2 size={24} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}

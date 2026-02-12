@@ -141,7 +141,7 @@ const NewsDetail = () => {
                 {news.type !== 'text' && (
                     <div className="mb-8 rounded-xl overflow-hidden bg-black/50 border border-gray-700/50">
                         {news.type === 'video' ? (
-                            <video src={news.mediaUrl} controls className="w-full max-h-[600px]" />
+                            <video src={news.mediaUrl} controls className="w-full aspect-video" />
                         ) : news.type === 'audio' ? (
                             <div className="p-8 flex flex-col items-center justify-center">
                                 <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4 text-blue-400">
@@ -150,8 +150,8 @@ const NewsDetail = () => {
                                 <audio src={news.mediaUrl} controls className="w-full max-w-md" />
                             </div>
                         ) : (
-                            // Images - Constrained Height & Better Carousel
-                            <div className="relative group bg-black/40 backdrop-blur-sm rounded-xl overflow-hidden shadow-2xl border border-white/5">
+                            // Images - Full Width Layout
+                            <div className="relative group bg-black/20 backdrop-blur-sm">
                                 {news.images && news.images.length > 1 ? (
                                     <>
                                         <div
@@ -159,11 +159,11 @@ const NewsDetail = () => {
                                             className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth"
                                         >
                                             {news.images.map((img, i) => (
-                                                <div key={i} className="min-w-full snap-center flex items-center justify-center p-2">
+                                                <div key={i} className="min-w-full snap-center">
                                                     <img
                                                         src={img.url}
                                                         alt={`Slide ${i + 1}`}
-                                                        className="max-h-[500px] w-auto max-w-full object-contain shadow-lg"
+                                                        className="w-full h-auto max-h-[80vh] object-contain mx-auto"
                                                     />
                                                 </div>
                                             ))}
@@ -187,12 +187,11 @@ const NewsDetail = () => {
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="flex justify-center p-2">
+                                    <div className="w-full">
                                         <img
                                             src={news.mediaUrl}
                                             alt={news.title}
-                                            // Fallback to max-h-[500px] to prevent taking full screen
-                                            className="max-h-[500px] w-auto max-w-full object-contain"
+                                            className="w-full h-auto max-h-[80vh] object-contain mx-auto"
                                         />
                                     </div>
                                 )}
