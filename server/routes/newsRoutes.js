@@ -3,6 +3,7 @@ const router = express.Router();
 const News = require('../models/News');
 const Note = require('../models/Note');
 const multer = require('multer');
+const axios = require('axios');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
@@ -55,6 +56,31 @@ router.get('/', async (req, res) => {
         res.json(news);
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+});
+
+// @desc    Get trending news
+// @route   GET /api/news/trending
+router.get('/trending', async (req, res) => {
+    try {
+        // Fetch top headlines from India (or change country as needed)
+        // Using 'technology' category or just general top headlines
+        const response = await axios.get(`https://newsapi.org/v2/top-headlines`, {
+            params: {
+                country: 'us', // Default to US for broader "trending" feel, or 'in' for India
+                category: 'general',
+                apiKey: process.env.NEWS_API_KEY,
+                pageSize: 10
+            }
+        });
+
+        // Filter out removed articles
+        const articles = response.data.articles.filter(article => article.title !== '[Removed]');
+        res.json(articles);
+    } catch (err) {
+        console.error('Error fetching trending news:', err.message);
+        // Fallback or empty array so frontend doesn't crash
+        res.json([]);
     }
 });
 

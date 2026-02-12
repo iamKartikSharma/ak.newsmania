@@ -3,6 +3,8 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import NewsCard from '../components/NewsCard';
 import UploadModal from '../components/UploadModal';
+import TrendingNews from '../components/TrendingNews';
+import KeyFiguresWidget from '../components/KeyFiguresWidget';
 import { FiSearch, FiTrendingUp } from 'react-icons/fi';
 
 const Home = () => {
@@ -66,46 +68,65 @@ const Home = () => {
                 </div>
             </motion.div>
 
-            {/* Category Filter */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-wrap justify-center gap-3 mb-12"
-            >
-                {categories.map((cat) => (
-                    <button
-                        key={cat}
-                        onClick={() => setCategory(cat === 'All' ? '' : cat)}
-                        className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${(category === cat || (cat === 'All' && !category))
-                            ? 'bg-white text-gray-900 shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105'
-                            : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700 hover:text-white border border-transparent hover:border-gray-600'
-                            }`}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </motion.div>
+            {/* Trending News Section */}
+            <TrendingNews />
 
-            {/* News Grid - Modern Masonry */}
-            {loading ? (
-                <div className="flex justify-center py-32">
-                    <div className="relative">
-                        <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <FiTrendingUp className="text-blue-500 animate-pulse" />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                {/* Main Content */}
+                <div className="lg:col-span-3 text-start">
+                    {/* Category Filter */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="flex flex-wrap justify-start gap-2 mb-8"
+                    >
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setCategory(cat === 'All' ? '' : cat)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${(category === cat || (cat === 'All' && !category))
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
+                                    : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-gray-600'
+                                    }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </motion.div>
+
+                    {/* News Grid - Modern Masonry */}
+                    {loading ? (
+                        <div className="flex justify-center py-32">
+                            <div className="relative">
+                                <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <FiTrendingUp className="text-blue-500 animate-pulse" />
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            ) : (
-                <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-                    {news.map((item, index) => (
-                        <div key={item._id} className="break-inside-avoid">
-                            <NewsCard news={item} index={index} />
+                    ) : (
+                        <div className="columns-1 md:columns-2 gap-6 space-y-6">
+                            {news.map((item, index) => (
+                                <div key={item._id} className="break-inside-avoid">
+                                    <NewsCard news={item} index={index} />
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
+
+                    {news.length === 0 && !loading && (
+                        <div className="text-center py-20 opacity-50">
+                            <p className="text-2xl text-gray-500">No news found.</p>
+                        </div>
+                    )}
                 </div>
-            )}
+
+                {/* Sidebar */}
+                <div className="lg:col-span-1 space-y-8">
+                    <KeyFiguresWidget />
+                </div>
+            </div>
 
             {news.length === 0 && !loading && (
                 <div className="text-center py-20 opacity-50">
