@@ -59,7 +59,7 @@ router.get('/', async (req, res) => {
 
 // @desc    Upload news
 // @route   POST /api/news
-router.post('/', upload.fields([{ name: 'file', maxCount: 1 }, { name: 'voice', maxCount: 1 }]), async (req, res) => {
+router.post('/', upload.fields([{ name: 'file', maxCount: 10 }, { name: 'voice', maxCount: 1 }]), async (req, res) => {
     console.log('[DEBUG] POST /api/news request received');
     console.log('[DEBUG] Body:', req.body);
     console.log('[DEBUG] Files:', req.files);
@@ -69,11 +69,19 @@ router.post('/', upload.fields([{ name: 'file', maxCount: 1 }, { name: 'voice', 
         let publicId = '';
         let voiceUrl = '';
         let voicePublicId = '';
+        let images = [];
 
-        // Handle Main File
+        // Handle Main File(s)
         if (req.files && req.files['file']) {
+            // First file is main media (backward compatibility)
             mediaUrl = req.files['file'][0].path;
             publicId = req.files['file'][0].filename;
+
+            // All files go to images array
+            images = req.files['file'].map(file => ({
+                url: file.path,
+                publicId: file.filename
+            }));
         }
 
         // Handle Voice Note
@@ -89,6 +97,7 @@ router.post('/', upload.fields([{ name: 'file', maxCount: 1 }, { name: 'voice', 
             type,
             mediaUrl,
             publicId,
+            images,
             voiceUrl,
             voicePublicId,
             link,

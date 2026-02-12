@@ -1,8 +1,21 @@
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { FiMic, FiImage, FiType, FiVideo, FiTrash2, FiCalendar, FiLink } from 'react-icons/fi';
 
 const NewsCard = ({ news, index }) => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const scrollRef = useRef(null);
+
+    const handleScroll = () => {
+        if (scrollRef.current) {
+            const scrollLeft = scrollRef.current.scrollLeft;
+            const width = scrollRef.current.clientWidth;
+            const newSlide = Math.round(scrollLeft / width);
+            setCurrentSlide(newSlide);
+        }
+    };
+
     const getIcon = () => {
         switch (news.type) {
             case 'video': return <FiVideo />;
@@ -19,9 +32,35 @@ const NewsCard = ({ news, index }) => {
             transition={{ delay: index * 0.05 }}
             className="glass-card rounded-2xl overflow-hidden break-inside-avoid"
         >
-            {news.mediaUrl && news.type === 'image' && (
-                <div className="h-40 md:h-48 overflow-hidden">
-                    <img src={news.mediaUrl} alt={news.title} className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" />
+            {news.type === 'image' && (
+                <div className="h-40 md:h-48 overflow-hidden relative group">
+                    {news.images && news.images.length > 1 ? (
+                        <>
+                            <div
+                                ref={scrollRef}
+                                onScroll={handleScroll}
+                                className="flex overflow-x-auto snap-x snap-mandatory h-full scrollbar-hide"
+                            >
+                                {news.images.map((img, i) => (
+                                    <img
+                                        key={i}
+                                        src={img.url}
+                                        alt={`${news.title} ${i + 1}`}
+                                        className="w-full h-full object-cover flex-shrink-0 snap-center"
+                                    />
+                                ))}
+                            </div>
+                            <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-medium text-white shadow-sm border border-white/10">
+                                {currentSlide + 1} / {news.images.length}
+                            </div>
+                        </>
+                    ) : (
+                        <img
+                            src={news.mediaUrl}
+                            alt={news.title}
+                            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                        />
+                    )}
                 </div>
             )}
             {news.mediaUrl && news.type === 'video' && (

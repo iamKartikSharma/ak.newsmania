@@ -10,6 +10,10 @@ const newsSchema = mongoose.Schema({
     voiceUrl: { type: String }, // Voice Note URL
     voicePublicId: { type: String }, // Voice Note Public ID
     link: { type: String }, // External Link
+    images: [{
+        url: { type: String },
+        publicId: { type: String }
+    }], // Multiple Images
     date: { type: Date, default: Date.now },
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
 }, { timestamps: true });

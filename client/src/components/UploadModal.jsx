@@ -9,7 +9,7 @@ const UploadModal = ({ onSuccess }) => {
     const [category, setCategory] = useState('');
     const [type, setType] = useState('text');
     const [link, setLink] = useState('');
-    const [file, setFile] = useState(null);
+    const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
 
     // Recording State
@@ -85,7 +85,11 @@ const UploadModal = ({ onSuccess }) => {
         formData.append('type', type);
         formData.append('link', link);
 
-        if (file) formData.append('file', file);
+        if (files.length > 0) {
+            Array.from(files).forEach((file) => {
+                formData.append('file', file);
+            });
+        }
 
         // Append voice note if exists
         if (audioBlob) {
@@ -116,7 +120,7 @@ const UploadModal = ({ onSuccess }) => {
         // Reset form
         setTitle('');
         setContent('');
-        setFile(null);
+        setFiles([]);
         setType('text');
         setCategory('');
         setLink('');
@@ -173,7 +177,7 @@ const UploadModal = ({ onSuccess }) => {
                                     value={type}
                                     onChange={e => {
                                         setType(e.target.value);
-                                        setFile(null); // Reset file when type changes
+                                        setFiles([]); // Reset files when type changes
                                     }}
                                 >
                                     <option value="text" className="text-gray-800">Text Article</option>
@@ -189,13 +193,18 @@ const UploadModal = ({ onSuccess }) => {
                             <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer relative">
                                 <input
                                     type="file"
+                                    multiple
                                     className="absolute inset-0 opacity-0 cursor-pointer"
-                                    onChange={e => setFile(e.target.files[0])}
+                                    onChange={e => setFiles(e.target.files)}
                                     accept={type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : 'audio/*'}
                                 />
                                 <div className="flex flex-col items-center gap-2 text-gray-400">
                                     <FiUploadCloud size={24} />
-                                    <span className="text-sm">{file ? file.name : `Upload ${type}`}</span>
+                                    <span className="text-sm">
+                                        {files.length > 0
+                                            ? `${files.length} file(s) selected`
+                                            : `Upload ${type === 'image' ? 'Images' : type}`}
+                                    </span>
                                 </div>
                             </div>
                         )}
