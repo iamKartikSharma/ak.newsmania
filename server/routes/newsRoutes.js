@@ -27,7 +27,8 @@ const storage = new CloudinaryStorage({
         return {
             folder: 'newsmania',
             resource_type: resource_type,
-            public_id: file.fieldname + '-' + Date.now(),
+            // Add random suffix to prevent overwrite if multiple files upload at same ms
+            public_id: file.fieldname + '-' + Date.now() + '-' + Math.round(Math.random() * 1000),
         };
     },
 });
@@ -110,6 +111,63 @@ router.post('/', upload.fields([{ name: 'file', maxCount: 10 }, { name: 'voice',
         res.status(201).json(savedNews);
     } catch (err) {
         console.error('[DEBUG] Error in POST /api/news:', err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// @desc    Update news
+// @route   PUT /api/news/:id
+router.put('/:id', upload.fields([{ name: 'file', maxCount: 10 }, { name: 'voice', maxCount: 1 }]), async (req, res) => {
+    console.log(`[DEBUG] PUT /api/news/${req.params.id} request received`);
+    try {
+        const news = await News.findById(req.params.id);
+        if (!news) {
+            return res.status(404).json({ message: 'News not found' });
+        }
+
+        const { title, content, category, type, link } = req.body;
+
+        // Update text fields
+        if (title) news.title = title;
+        if (content) news.content = content;
+        if (category) news.category = category;
+        if (type) news.type = type;
+        if (link) news.link = link;
+
+        // Handle Main File(s) - Append or Replace
+        if (req.files && req.files['file']) {
+            const newFiles = req.files['file'].map(file => ({
+                url: file.path,
+                publicId: file.filename
+            }));
+
+            if (type === 'image' || news.type === 'image') {
+                // If it's an image type, we append to existing images
+                news.images.push(...newFiles);
+                // If for some reason mediaUrl was empty, set it
+                if (!news.mediaUrl) {
+                    news.mediaUrl = newFiles[0].url;
+                    news.publicId = newFiles[0].publicId;
+                }
+            } else {
+                // For video/audio, we typically replace the main media
+                // Optional: Delete old media from Cloudinary if needed, but let's keep it safe for now or logic gets complex
+                news.mediaUrl = newFiles[0].url;
+                news.publicId = newFiles[0].publicId;
+                news.images = []; // Clear images if switching to non-image type? Or keep them? Let's clear to avoid confusion.
+            }
+        }
+
+        // Handle Voice Note - Replace
+        if (req.files && req.files['voice']) {
+            news.voiceUrl = req.files['voice'][0].path;
+            news.voicePublicId = req.files['voice'][0].filename;
+        }
+
+        const updatedNews = await news.save();
+        res.json(updatedNews);
+    } catch (err) {
+        console.error('[DEBUG] Error in PUT /api/news:', err);
         res.status(500).json({ message: err.message });
     }
 });

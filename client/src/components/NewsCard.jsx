@@ -2,8 +2,10 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { FiMic, FiImage, FiType, FiVideo, FiTrash2, FiCalendar, FiLink } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const NewsCard = ({ news, index }) => {
+    const navigate = useNavigate();
     const [currentSlide, setCurrentSlide] = useState(0);
     const scrollRef = useRef(null);
 
@@ -30,15 +32,21 @@ const NewsCard = ({ news, index }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="glass-card rounded-2xl overflow-hidden break-inside-avoid"
+            className="glass-card rounded-2xl overflow-hidden break-inside-avoid cursor-pointer group/card hover:bg-gray-800/90 transition-colors"
+            onClick={() => navigate(`/news/${news._id}`)}
         >
+            {/* Image Carousel / Single Image */}
             {news.type === 'image' && (
                 <div className="h-40 md:h-48 overflow-hidden relative group">
                     {news.images && news.images.length > 1 ? (
                         <>
                             <div
                                 ref={scrollRef}
-                                onScroll={handleScroll}
+                                onScroll={(e) => {
+                                    e.stopPropagation();
+                                    handleScroll();
+                                }}
+                                onClick={(e) => e.stopPropagation()}
                                 className="flex overflow-x-auto snap-x snap-mandatory h-full scrollbar-hide"
                             >
                                 {news.images.map((img, i) => (
@@ -64,12 +72,12 @@ const NewsCard = ({ news, index }) => {
                 </div>
             )}
             {news.mediaUrl && news.type === 'video' && (
-                <div className="h-40 md:h-48 bg-black">
+                <div className="h-40 md:h-48 bg-black" onClick={(e) => e.stopPropagation()}>
                     <video src={news.mediaUrl} controls className="w-full h-full" />
                 </div>
             )}
             {news.mediaUrl && news.type === 'audio' && (
-                <div className="p-4 bg-gray-800/50">
+                <div className="p-4 bg-gray-800/50" onClick={(e) => e.stopPropagation()}>
                     <audio src={news.mediaUrl} controls className="w-full" />
                 </div>
             )}
@@ -82,16 +90,10 @@ const NewsCard = ({ news, index }) => {
                     <span className="text-gray-500 text-lg">{getIcon()}</span>
                 </div>
 
-                <h3 className="text-xl font-bold mb-2 leading-tight">{news.title}</h3>
+                <h3 className="text-xl font-bold mb-2 leading-tight group-hover/card:text-blue-400 transition-colors">{news.title}</h3>
 
                 {news.type === 'text' && (
                     <p className="text-gray-400 text-sm line-clamp-4 mb-4">
-                        {news.content}
-                    </p>
-                )}
-
-                {news.content && news.type !== 'text' && (
-                    <p className="text-gray-400 text-sm line-clamp-2 mb-4">
                         {news.content}
                     </p>
                 )}
@@ -125,7 +127,7 @@ const NewsCard = ({ news, index }) => {
                     {/* Add edit/delete actions here if needed */}
                 </div>
                 {news.voiceUrl && (
-                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-2 mb-2 text-blue-400">
                             <FiMic className="w-4 h-4" />
                             <span className="text-xs font-medium uppercase tracking-wider">Voice Note</span>

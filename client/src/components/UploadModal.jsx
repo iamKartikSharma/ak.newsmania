@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { FiX, FiUploadCloud, FiMic, FiSquare, FiPlay, FiTrash2 } from 'react-icons/fi';
 
-const UploadModal = ({ onSuccess }) => {
+const UploadModal = ({ onSuccess, initialData = null, onClose }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [category, setCategory] = useState('');
@@ -11,6 +11,34 @@ const UploadModal = ({ onSuccess }) => {
     const [link, setLink] = useState('');
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    // Pre-fill data if editing
+    useEffect(() => {
+        if (initialData) {
+            setTitle(initialData.title || '');
+            setContent(initialData.content || '');
+            setCategory(initialData.category || '');
+            setType(initialData.type || 'text');
+            setLink(initialData.link || '');
+            // We don't pre-fill files as we can't reconstruct File objects easily from URLs for the input
+            // But the user can add *more* files.
+        }
+    }, [initialData]);
+
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const newFiles = Array.from(e.target.files);
+            if (type === 'image') {
+                setFiles(prev => [...prev, ...newFiles]);
+            } else {
+                setFiles(newFiles);
+            }
+        }
+    };
+
+    const removeFile = (index) => {
+        setFiles(prev => prev.filter((_, i) => i !== index));
+    };
 
     // Recording State
     const [isRecording, setIsRecording] = useState(false);
@@ -99,24 +127,45 @@ const UploadModal = ({ onSuccess }) => {
 
         try {
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            console.log(`[DEBUG] Sending request to: ${API_URL}/api/news`);
-            await axios.post(`${API_URL}/api/news`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            toast.success('News uploaded successfully!');
-            onSuccess();
+
+            if (initialData) {
+                // Update existing news
+                console.log(`[DEBUG] Sending PUT request to: ${API_URL}/api/news/${initialData._id}`);
+                await axios.put(`${API_URL}/api/news/${initialData._id}`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                toast.success('News updated successfully!');
+            } else {
+                // Create new news
+                console.log(`[DEBUG] Sending POST request to: ${API_URL}/api/news`);
+                await axios.post(`${API_URL}/api/news`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                toast.success('News uploaded successfully!');
+            }
+
+            if (onSuccess) onSuccess();
             handleClose();
         } catch (err) {
-            console.error("Upload Error Details:", err);
-            const errorMessage = err.response?.data?.message || err.message || 'Failed to upload news';
-            toast.error(`Upload failed: ${errorMessage}`);
+            console.error("Upload/Update Error Details:", err);
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to save news';
+            toast.error(`Operation failed: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
     };
 
     const handleClose = () => {
-        document.getElementById('upload_modal').close();
+        // If controlled via props (e.g. from NewsDetail), call onClose
+        if (onClose) {
+            onClose();
+            return;
+        }
+
+        // Fallback for document.getElementById usage
+        const modal = document.getElementById('upload_modal');
+        if (modal) modal.close();
+
         // Reset form
         setTitle('');
         setContent('');
@@ -129,9 +178,9 @@ const UploadModal = ({ onSuccess }) => {
     };
 
     return (
-        <dialog id="upload_modal" className="modal bg-transparent">
+        <dialog id="upload_modal" className="modal bg-transparent" open={!!initialData}>
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                <div className="glass-panel w-full max-w-lg rounded-2xl p-6 relative">
+                <div className="glass-panel w-full max-w-lg rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
                     <button
                         onClick={handleClose}
                         className="absolute right-4 top-4 text-gray-400 hover:text-white"
@@ -139,7 +188,7 @@ const UploadModal = ({ onSuccess }) => {
                         <FiX size={24} />
                     </button>
 
-                    <h2 className="text-2xl font-bold mb-6">Create News Entry</h2>
+                    <h2 className="text-2xl font-bold mb-6">{initialData ? 'Edit News Entry' : 'Create News Entry'}</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
@@ -177,7 +226,7 @@ const UploadModal = ({ onSuccess }) => {
                                     value={type}
                                     onChange={e => {
                                         setType(e.target.value);
-                                        setFiles([]); // Reset files when type changes
+                                        // setFiles([]); // Keep files if just switching types during edit? Maybe safer to reset.
                                     }}
                                 >
                                     <option value="text" className="text-gray-800">Text Article</option>
@@ -190,22 +239,70 @@ const UploadModal = ({ onSuccess }) => {
 
                         {/* File Upload UI */}
                         {type !== 'text' && (
-                            <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer relative">
-                                <input
-                                    type="file"
-                                    multiple
-                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                    onChange={e => setFiles(e.target.files)}
-                                    accept={type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : 'audio/*'}
-                                />
-                                <div className="flex flex-col items-center gap-2 text-gray-400">
-                                    <FiUploadCloud size={24} />
-                                    <span className="text-sm">
-                                        {files.length > 0
-                                            ? `${files.length} file(s) selected`
-                                            : `Upload ${type === 'image' ? 'Images' : type}`}
-                                    </span>
+                            <div className="space-y-4">
+                                {/* Existing Images (Edit Mode) */}
+                                {initialData && initialData.images && initialData.images.length > 0 && type === 'image' && (
+                                    <div className="space-y-2">
+                                        <p className="text-sm text-gray-400">Existing Images:</p>
+                                        <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                                            {initialData.images.map((img, idx) => (
+                                                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-700">
+                                                    <img src={img.url} alt="existing" className="w-full h-full object-cover" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer relative">
+                                    <input
+                                        type="file"
+                                        multiple={type === 'image'}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        onChange={handleFileChange}
+                                        accept={type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : 'audio/*'}
+                                        // Reset value to allow selecting the same file again if needed (though unlikely with append)
+                                        value=""
+                                    />
+                                    <div className="flex flex-col items-center gap-2 text-gray-400">
+                                        <FiUploadCloud size={24} />
+                                        <span className="text-sm">
+                                            {initialData ? 'Add More Files' : (type === 'image' ? 'Add Images' : `Upload ${type}`)}
+                                        </span>
+                                    </div>
                                 </div>
+
+                                {/* File Previews */}
+                                {files.length > 0 && (
+                                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                                        {files.map((file, index) => (
+                                            <div key={index} className="relative group bg-gray-800 rounded-lg p-2 flex items-center gap-2 border border-gray-700">
+                                                {type === 'image' ? (
+                                                    <div className="w-10 h-10 rounded overflow-hidden bg-black shrink-0">
+                                                        <img
+                                                            src={URL.createObjectURL(file)}
+                                                            alt="preview"
+                                                            className="w-full h-full object-cover"
+                                                            onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Clean up memory
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded bg-gray-700 flex items-center justify-center shrink-0">
+                                                        <FiSquare />
+                                                    </div>
+                                                )}
+                                                <span className="text-xs text-gray-300 truncate flex-1">{file.name}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeFile(index)}
+                                                    className="text-gray-400 hover:text-red-400 p-1"
+                                                >
+                                                    <FiX size={16} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -285,7 +382,7 @@ const UploadModal = ({ onSuccess }) => {
                                 disabled={loading || isRecording}
                                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 py-2.5 rounded-lg font-medium shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? 'Uploading...' : 'Publish News'}
+                                {loading ? (initialData ? 'Updating...' : 'Uploading...') : (initialData ? 'Update News' : 'Publish News')}
                             </button>
                         </div>
                     </form>
