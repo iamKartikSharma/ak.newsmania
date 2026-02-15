@@ -11,15 +11,22 @@ const SebiTimeline = () => {
     const [explainingId, setExplainingId] = useState(null);
     const [explanations, setExplanations] = useState({});
 
+    const [errorMsg, setErrorMsg] = useState(null);
+
     const fetchNews = async () => {
         setLoading(true);
+        setErrorMsg(null);
         try {
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            console.log("SEBI Timeline fetching from:", `${API_URL}/api/sebi/news`);
+
             // "Automatic Update" mechanism: Fetching fresh data from our API
             const { data } = await axios.get(`${API_URL}/api/sebi/news`);
             setNews(data);
         } catch (error) {
             console.error('Error fetching SEBI news:', error);
+            const apiTarget = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            setErrorMsg(`Failed to load: ${error.message}. Tried: ${apiTarget}/api/sebi/news`);
             toast.error('Failed to load SEBI timeline');
         } finally {
             setLoading(false);
@@ -74,6 +81,20 @@ const SebiTimeline = () => {
             {loading && news.length === 0 ? (
                 <div className="flex justify-center items-center h-64">
                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            ) : errorMsg ? (
+                <div className="text-center text-red-400 p-8 glass-panel rounded-xl">
+                    <p className="text-xl font-bold mb-2">⚠️ Error Loading Timeline</p>
+                    <p className="font-mono text-sm bg-black/30 p-4 rounded mb-4">{errorMsg}</p>
+                    <button
+                        onClick={fetchNews}
+                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-full transition-colors"
+                    >
+                        Try Again
+                    </button>
+                    <p className="mt-4 text-xs text-gray-500">
+                        Check your Vercel Environment Variables (key: VITE_API_URL).
+                    </p>
                 </div>
             ) : (
                 <div className="relative border-l-2 border-blue-500/30 ml-4 md:ml-10 space-y-12">
