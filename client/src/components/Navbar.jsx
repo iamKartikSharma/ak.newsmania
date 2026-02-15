@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiGrid, FiTrendingUp, FiMenu, FiX } from 'react-icons/fi';
+import { FiPlus, FiGrid, FiTrendingUp, FiMenu, FiX, FiClock } from 'react-icons/fi';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +24,9 @@ const Navbar = () => {
                     </Link>
                     <Link to="/events" className="flex items-center gap-2 hover:text-purple-400 transition-colors">
                         <FiTrendingUp /> Events
+                    </Link>
+                    <Link to="/sebi-timeline" className="flex items-center gap-2 hover:text-pink-400 transition-colors">
+                        <FiClock /> SEBI Timeline
                     </Link>
                     <button
                         className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-5 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-purple-500/20 transition-all active:scale-95"
@@ -63,6 +66,13 @@ const Navbar = () => {
                                 onClick={() => setIsOpen(false)}
                             >
                                 <FiTrendingUp /> Events
+                            </Link>
+                            <Link
+                                to="/sebi-timeline"
+                                className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                <FiClock /> SEBI Timeline
                             </Link>
                             <button
                                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg w-full"

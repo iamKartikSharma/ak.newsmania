@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import NewsDetail from './pages/NewsDetail';
 import Events from './pages/Events';
+import SebiTimeline from './pages/SebiTimeline';
 import EventView from './pages/EventView';
 import { Toaster } from 'react-hot-toast';
 
@@ -18,6 +19,7 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/news/:id" element={<NewsDetail />} />
                         <Route path="/events" element={<Events />} />
+                        <Route path="/sebi-timeline" element={<SebiTimeline />} />
                         <Route path="/event/:id" element={<EventView />} />
                     </Routes>
                 </main>
