@@ -14,8 +14,9 @@ const SebiTimeline = () => {
     const fetchNews = async () => {
         setLoading(true);
         try {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             // "Automatic Update" mechanism: Fetching fresh data from our API
-            const { data } = await axios.get('http://localhost:5000/api/sebi/news');
+            const { data } = await axios.get(`${API_URL}/api/sebi/news`);
             setNews(data);
         } catch (error) {
             console.error('Error fetching SEBI news:', error);
@@ -37,7 +38,8 @@ const SebiTimeline = () => {
 
         setExplainingId(articleId);
         try {
-            const { data } = await axios.post('http://localhost:5000/api/sebi/explain', { text });
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const { data } = await axios.post(`${API_URL}/api/sebi/explain`, { text });
             setExplanations(prev => ({ ...prev, [articleId]: data.explanation }));
         } catch (error) {
             console.error('Error explaining news:', error);
