@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import NewsCard from '../components/NewsCard';
 import UploadModal from '../components/UploadModal';
 import TrendingNews from '../components/TrendingNews';
+import IndianNews from '../components/IndianNews';
 import KeyFiguresWidget from '../components/KeyFiguresWidget';
 import { FiSearch, FiTrendingUp } from 'react-icons/fi';
 
@@ -70,6 +71,11 @@ const Home = () => {
 
             {/* Trending News Section */}
             <TrendingNews />
+
+            {/* Indian News Section */}
+            <div className="mb-16">
+                <IndianNews />
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Main Content */}

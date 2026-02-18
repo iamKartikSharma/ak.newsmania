@@ -84,6 +84,19 @@ router.get('/trending', async (req, res) => {
     }
 });
 
+// @desc    Get Indian news from RSS feeds
+// @route   GET /api/news/indian
+router.get('/indian', async (req, res) => {
+    try {
+        const { fetchIndianNews } = require('../utils/rssFetcher');
+        const news = await fetchIndianNews();
+        res.json(news);
+    } catch (err) {
+        console.error('Error fetching Indian news:', err);
+        res.status(500).json({ message: 'Failed to fetch Indian news' });
+    }
+});
+
 // @desc    Upload news
 // @route   POST /api/news
 router.post('/', upload.fields([{ name: 'file', maxCount: 10 }, { name: 'voice', maxCount: 1 }]), async (req, res) => {
