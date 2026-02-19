@@ -16,6 +16,7 @@ app.use(cors());
 app.use('/api/news', require('./routes/newsRoutes'));
 app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/api/sebi', require('./routes/sebiRoutes'));
+app.use('/api/leaders', require('./routes/leaderRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
