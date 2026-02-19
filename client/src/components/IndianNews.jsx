@@ -8,7 +8,7 @@ const IndianNews = () => {
     const [filter, setFilter] = useState('All');
 
     // Sources mapping for filter
-    const sources = ['All', 'Times of India', 'Dainik Jagran', 'Amar Ujala', 'The Indian Express', 'Hindustan Times'];
+    const sources = ['All', 'The Times of India', 'Business Standard', 'Livemint', 'The Economic Times', 'Financial Times'];
 
     useEffect(() => {
         fetchNews();
@@ -111,7 +111,7 @@ const IndianNews = () => {
                                             }`}>
                                             {item.source}
                                         </span>
-                                        <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                                        <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                             {formatDate(item.isoDate)}
                                         </span>
@@ -151,11 +151,11 @@ const IndianNews = () => {
 // Helper for source colors
 const getItemColor = (source) => {
     switch (source) {
-        case 'Times of India': return 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400';
-        case 'Dainik Jagran': return 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400';
-        case 'Amar Ujala': return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400';
-        case 'The Indian Express': return 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
-        case 'Hindustan Times': return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400';
+        case 'The Times of India': return 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400';
+        case 'Business Standard': return 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400';
+        case 'Livemint': return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400';
+        case 'The Economic Times': return 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
+        case 'Financial Times': return 'bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-400';
         default: return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400';
     }
 };

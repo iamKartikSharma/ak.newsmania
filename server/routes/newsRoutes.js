@@ -6,6 +6,8 @@ const multer = require('multer');
 const axios = require('axios');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 900 }); // Cache for 15 minutes
 
 // Cloudinary Config (Ensure env vars are set)
 cloudinary.config({
@@ -63,6 +65,15 @@ router.get('/', async (req, res) => {
 // @route   GET /api/news/trending
 router.get('/trending', async (req, res) => {
     try {
+        const cacheKey = 'trending_news';
+        const cachedData = cache.get(cacheKey);
+
+        if (cachedData) {
+            console.log('[CACHE] Hit for trending news');
+            return res.json(cachedData);
+        }
+
+        console.log('[CACHE] Miss for trending news. Fetching from API...');
         // Fetch top headlines from India (or change country as needed)
         // Using 'technology' category or just general top headlines
         const response = await axios.get(`https://newsapi.org/v2/top-headlines`, {
@@ -76,6 +87,8 @@ router.get('/trending', async (req, res) => {
 
         // Filter out removed articles
         const articles = response.data.articles.filter(article => article.title !== '[Removed]');
+
+        cache.set(cacheKey, articles);
         res.json(articles);
     } catch (err) {
         console.error('Error fetching trending news:', err.message);
@@ -88,8 +101,19 @@ router.get('/trending', async (req, res) => {
 // @route   GET /api/news/indian
 router.get('/indian', async (req, res) => {
     try {
+        const cacheKey = 'indian_news';
+        const cachedData = cache.get(cacheKey);
+
+        if (cachedData) {
+            console.log('[CACHE] Hit for Indian news');
+            return res.json(cachedData);
+        }
+
+        console.log('[CACHE] Miss for Indian news. Fetching from RSS...');
         const { fetchIndianNews } = require('../utils/rssFetcher');
         const news = await fetchIndianNews();
+
+        cache.set(cacheKey, news);
         res.json(news);
     } catch (err) {
         console.error('Error fetching Indian news:', err);

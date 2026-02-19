@@ -7,25 +7,25 @@ const parser = new Parser({
 
 const FEEDS = [
     {
-        name: 'Times of India',
+        name: 'The Times of India',
         url: 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms',
-        logo: 'https://static.toiimg.com/photo/msid-47529300/47529300.jpg' // Generic fallback or frontend handles logos
+        logo: 'https://static.toiimg.com/photo/msid-47529300/47529300.jpg'
     },
     {
-        name: 'Dainik Jagran',
-        url: 'https://rss.jagran.com/rss/news/national.xml',
+        name: 'Business Standard',
+        url: 'https://www.business-standard.com/rss/home_page_top_stories.rss',
     },
     {
-        name: 'Amar Ujala',
-        url: 'https://www.amarujala.com/rss/breaking-news.xml',
+        name: 'Livemint',
+        url: 'https://www.livemint.com/rss/news',
     },
     {
-        name: 'The Indian Express',
-        url: 'https://indianexpress.com/feed/',
+        name: 'The Economic Times',
+        url: 'https://economictimes.indiatimes.com/rssfeedstopstories.cms',
     },
     {
-        name: 'Hindustan Times',
-        url: 'https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml',
+        name: 'Financial Times',
+        url: 'https://www.ft.com/?format=rss',
     }
 ];
 
